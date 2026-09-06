@@ -1,0 +1,16 @@
+# Only the site itself is uploaded to Cloudflare. Everything else stays in the repo.
+.git
+.github
+.gitignore
+.assetsignore
+.wrangler
+node_modules
+archive
+seed
+README.md
+wrangler.jsonc
+add
+merge
+wayback
+data.py
+__pycache__

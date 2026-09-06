@@ -1,3 +1,4 @@
 archive/
+.wrangler/
 seed/out/
 __pycache__/
