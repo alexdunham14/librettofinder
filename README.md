@@ -3,9 +3,9 @@
 Where to find an opera libretto with the original and an English translation
 side by side. The list is by opera, and the answer for each opera is a link.
 
-Side by side is the whole point: a translation on its own is listed too, but
-marked as such, because those are the operas where a side-by-side version
-still needs to be built.
+Side by side is the whole point: single-language pages are listed too, marked
+as the original text or as a translation, because those are the operas where a
+side-by-side version still needs to be built.
 
 ## Definition of done
 
@@ -39,7 +39,23 @@ From a phone: open a new issue using the "Add a libretto link" template.
 ```
 
 `merge` is idempotent: entries are keyed by id, so rerunning a seed updates
-rather than duplicates.
+rather than duplicates. `./merge --prune kareol.es seed/out/kareol.json` also
+drops entries of that source the seed no longer produces (after a seed fix).
+
+## Names
+
+Sources spell things their own way: Kareol in Spanish ("Las bodas de Fígaro",
+"Piotr Ilich Chaikovski"), opera-guide.ch in German or English. `data.py`
+holds three tables that fold them to one form so an opera is one group on the
+page: `COMPOSERS` (alias to canonical name), `OPERAS` (per composer, the
+source's title to the canonical title; a value can also move a work to the
+right composer where Kareol's index misfiles it), and `ORIGINAL` plus
+`OPERA_ORIGINAL` (the language the libretto was written in). Every entry gets
+`original` (language code or null) and, where the source's title differs,
+`listed_as`. Kareol entries list `[original, "es"]`. Seeds and `add` apply the
+tables as entries are made; `./normalize` reapplies them to `libretti.json`
+after a table change. Idempotent. Ids are built from the names as the source
+gives them, so they never change when a table does.
 
 ## Archiving
 
@@ -51,8 +67,9 @@ background and let it finish on its own. Private local copies go under
 
 ## Layout
 
-- `libretti.json`: the data. One object per link.
+- `libretti.json`: the data. One object per link: opera, composer, languages,
+  original, side_by_side, source, url, wayback, added, note, listed_as.
 - `index.html`, `styles.css`, `app.js`: the site. No build step.
 - `data.py`: shared helpers (load, save, merge, wayback, snapshot).
-- `add`, `merge`, `wayback`: the three commands.
+- `add`, `merge`, `normalize`, `wayback`: the four commands.
 - `seed/`: one script per bulk source.

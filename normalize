@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+"""./normalize  -- rewrite libretti.json with canonical composer and opera names and original languages (idempotent)."""
+import data
+entries = data.load()
+before = (len({e["composer"] for e in entries}), len({(e["composer"], e["opera"]) for e in entries}))
+data.normalize(entries)
+data.save(entries)
+after = (len({e["composer"] for e in entries}), len({(e["composer"], e["opera"]) for e in entries}))
+print(f"composers {before[0]} -> {after[0]}, operas {before[1]} -> {after[1]}, {len(entries)} entries")

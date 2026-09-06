@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
-"""./merge seed/out/*.json  -- merge seed output into libretti.json (idempotent)."""
+"""./merge [--prune SOURCE] seed/out/*.json  -- merge seed output into libretti.json (idempotent).
+--prune drops entries of SOURCE that the seed output no longer contains (after a seed fix)."""
 import json, sys
 import data
+args = sys.argv[1:]
+prune = None
+if args[:1] == ["--prune"]:
+    prune, args = args[1], args[2:]
 entries = data.load()
-for path in sys.argv[1:]:
+for path in args:
     with open(path, encoding="utf-8") as f:
         new = json.load(f)
-    a, u = data.merge(entries, new)
+    a, u = data.merge(entries, new, prune=prune)
     print(f"{path}: {len(new)} entries, {a} added, {u} updated")
 data.save(entries)
 print(f"{len(entries)} total")

@@ -9,21 +9,30 @@ import data
 BASE = "http://www.kareol.es/"
 page, _ = data.fetch(BASE + "autor.htm", encoding="latin-1")
 page = html.unescape(page)
-page = re.sub(r"</?font[^>]*>|<strong>\s*</strong>|&nbsp;", " ", page, flags=re.I)
+page = re.sub(r"</?font[^>]*>|&nbsp;", " ", page, flags=re.I)
+# Headings are <strong> or <b>, sometimes split across several tags ("<strong>FIBICH, </strong><b>Zdenek</b>").
+page = re.sub(r"</?b>", lambda m: m.group(0).replace("b", "strong"), page, flags=re.I)
+page = re.sub(r"<strong>(?:\s|<br>)*</strong>", " ", page, flags=re.I)
 strip = lambda s: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", s)).strip()
 cap = lambda s: " ".join(w[:1].upper() + w[1:].lower() for w in s.split())
 
 out = []
-composer = None
-for m in re.finditer(r'<strong>([^<]+)</strong>|<a\s+href="(obras/[^"]+)"[^>]*>(.*?)</a>(.{0,200}?)(?=<a\s+href|<strong>|$)', page, re.S | re.I):
+composer, heading = None, ""
+for m in re.finditer(r'<strong>((?:[^<]|<br>)+)</strong>|<a\s+href="(obras/[^"]+)"[^>]*>(.*?)</a>(.{0,200}?)(?=<a\s+href|<strong>|$)', page, re.S | re.I):
     if m.group(1):
-        raw = strip(m.group(1))
+        frag = strip(m.group(1))
+        if all(len(w) == 1 for w in frag.split()):  # the A–Z index anchors, not a composer
+            continue
+        heading = (heading + " " + frag).strip()  # fragments accumulate until the next work link
+        continue
+    if heading:
+        raw = re.sub(r"\s+", " ", heading)
         if "," in raw:
             last, first = [x.strip() for x in raw.split(",", 1)]
             composer = f"{first} {cap(last)}".strip()
-        elif raw and raw == raw.upper() and len(raw) > 2:
+        elif raw == raw.upper() and len(raw) > 2:
             composer = cap(raw)
-        continue
+        heading = ""
     if not composer:
         continue
     href, title, tail = m.group(2), strip(m.group(3)), strip(m.group(4))

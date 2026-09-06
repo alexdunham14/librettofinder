@@ -2,6 +2,8 @@ body { max-width: 42rem; margin: 2rem auto; padding: 0 1rem; font: 1.0625rem/1.5
 @media (prefers-color-scheme: dark) { body { color: #e6e6e6; background: #141414; } a { color: #9cc4ff; } }
 h1 { font-weight: normal; font-size: 2rem; margin: 0 0 .5rem; }
 h2 { font-weight: normal; font-size: 1.25rem; margin: 2rem 0 .25rem; border-bottom: 1px solid #ccc; }
+h2 small { color: #888; font-size: .75em; }
+#count { color: #666; margin: -.75rem 0 1.5rem; }
 form { margin: 1.5rem 0; display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; }
 #q { flex: 1 1 14rem; font: inherit; padding: .3rem .5rem; }
 select { font: inherit; }
