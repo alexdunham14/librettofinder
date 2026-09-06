@@ -120,7 +120,8 @@ def merge(entries, new, prune=None):
 def wayback_save(url):
     """Ask the Wayback Machine to save URL now. Returns a dated snapshot URL, or None."""
     try:
-        req = urllib.request.Request("https://web.archive.org/save/" + url, headers={"User-Agent": UA})
+        safe_url = urllib.parse.quote(url, safe=":/?&=+%#~")
+        req = urllib.request.Request("https://web.archive.org/save/" + safe_url, headers={"User-Agent": UA})
         with urllib.request.urlopen(req, timeout=120) as r:
             loc = r.headers.get("Content-Location") or r.geturl()
             if loc.startswith("/"):
