@@ -1,0 +1,43 @@
+name: Add libretto from issue
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: write
+  issues: write
+jobs:
+  add:
+    if: contains(github.event.issue.labels.*.name, 'libretto')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse the issue form and run ./add
+        env:
+          BODY: ${{ github.event.issue.body }}
+        run: |
+          python3 - <<'PY'
+          import os, re, subprocess, sys
+          body = os.environ["BODY"]
+          f = {m.group(1).strip().lower(): m.group(2).strip() for m in re.finditer(r"^### (.+?)\s*\n(.*?)(?=^### |\Z)", body, re.M | re.S)}
+          g = lambda k: "" if f.get(k, "") in ("", "_No response_") else f[k]
+          cmd = ["./add", g("url"), "--opera", g("opera"), "--composer", g("composer"), "--languages", g("languages"), "--note", g("note (optional)"), "--no-snapshot"]
+          if g("side by side") == "yes": cmd.append("--side-by-side")
+          sys.exit(subprocess.call(cmd))
+          PY
+      - name: Commit
+        run: |
+          git config user.name "librettofinder bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add libretti.json
+          git commit -m "Add libretto link from issue #${{ github.event.issue.number }}"
+          git push
+      - name: Close the issue
+        if: success()
+        run: gh issue close ${{ github.event.issue.number }} --comment "Added. Live once Pages redeploys."
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Report failure
+        if: failure()
+        run: gh issue comment ${{ github.event.issue.number }} --body "The add script failed. See the Actions log."
+        env:
+          GH_TOKEN: ${{ github.token }}

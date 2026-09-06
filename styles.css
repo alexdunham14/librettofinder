@@ -1,0 +1,13 @@
+body { max-width: 42rem; margin: 2rem auto; padding: 0 1rem; font: 1.0625rem/1.5 Georgia, "Times New Roman", serif; color: #1a1a1a; background: #fff; }
+@media (prefers-color-scheme: dark) { body { color: #e6e6e6; background: #141414; } a { color: #9cc4ff; } }
+h1 { font-weight: normal; font-size: 2rem; margin: 0 0 .5rem; }
+h2 { font-weight: normal; font-size: 1.25rem; margin: 2rem 0 .25rem; border-bottom: 1px solid #ccc; }
+form { margin: 1.5rem 0; display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; }
+#q { flex: 1 1 14rem; font: inherit; padding: .3rem .5rem; }
+select { font: inherit; }
+dl { margin: 0; }
+dt { margin-top: .6rem; }
+dd { margin: 0 0 0 1.25rem; }
+dd small { color: #666; }
+@media (prefers-color-scheme: dark) { dd small { color: #999; } h2 { border-color: #444; } }
+.none { color: #666; }

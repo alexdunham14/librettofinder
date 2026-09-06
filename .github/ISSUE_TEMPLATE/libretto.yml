@@ -1,0 +1,30 @@
+name: Add a libretto link
+description: Add a libretto page to the finder
+title: "Add: "
+labels: [libretto]
+body:
+  - type: input
+    id: url
+    attributes: { label: URL }
+    validations: { required: true }
+  - type: input
+    id: opera
+    attributes: { label: Opera }
+    validations: { required: true }
+  - type: input
+    id: composer
+    attributes: { label: Composer, description: "Full name, e.g. Hector Berlioz" }
+    validations: { required: true }
+  - type: input
+    id: languages
+    attributes: { label: Languages, description: "Comma separated codes on the page, e.g. fr,en" }
+    validations: { required: true }
+  - type: dropdown
+    id: sbs
+    attributes:
+      label: Side by side
+      options: [ "yes", "no" ]
+    validations: { required: true }
+  - type: input
+    id: note
+    attributes: { label: Note (optional) }

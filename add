@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""Add one libretto link by hand.
+
+./add URL --opera "..." --composer "..." --languages it,en [--side-by-side] [--note "..."] [--no-snapshot]
+"""
+import argparse, json, sys
+import data
+
+ap = argparse.ArgumentParser()
+ap.add_argument("url")
+ap.add_argument("--opera", required=True)
+ap.add_argument("--composer", required=True)
+ap.add_argument("--languages", required=True, help="comma separated codes, e.g. it,en")
+ap.add_argument("--side-by-side", action="store_true")
+ap.add_argument("--note", default="")
+ap.add_argument("--no-snapshot", action="store_true")
+a = ap.parse_args()
+
+langs = [l.strip().lower() for l in a.languages.split(",") if l.strip()]
+e = data.entry(a.opera.strip(), a.composer.strip(), a.url.strip(), langs, a.side_by_side, note=a.note.strip())
+entries = data.load()
+if any(x["id"] == e["id"] for x in entries):
+    sys.exit(f"already listed: {e['id']}")
+saved = data.wayback_save(e["url"])
+if saved:
+    e["wayback"] = saved
+if not a.no_snapshot:
+    try:
+        data.snapshot(e)
+    except Exception as ex:  # noqa: BLE001
+        print(f"snapshot failed: {ex}", file=sys.stderr)
+entries.append(e)
+data.save(entries)
+print(json.dumps(e, indent=2, ensure_ascii=False))

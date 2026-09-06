@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Request Wayback saves (and private local snapshots) for entries that lack a dated snapshot.
+
+./wayback [--delay 20] [--limit N] [--no-snapshot]
+Slow on purpose: archive.org rate-limits Save Page Now. Safe to rerun; it picks up where it left off.
+"""
+import argparse, sys, time
+import data
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--delay", type=float, default=20)
+ap.add_argument("--limit", type=int, default=0)
+ap.add_argument("--no-snapshot", action="store_true")
+a = ap.parse_args()
+
+entries = data.load()
+todo = [e for e in entries if "web.archive.org/web/2/" in e["wayback"] and "web.archive.org" not in e["url"]]
+print(f"{len(todo)} entries without a dated snapshot", flush=True)
+done = 0
+for e in todo:
+    if a.limit and done >= a.limit:
+        break
+    saved = data.wayback_save(e["url"])
+    if saved:
+        e["wayback"] = saved
+        data.save(entries)
+        print("saved", e["id"], flush=True)
+    else:
+        print("skipped", e["id"], flush=True)
+    if not a.no_snapshot:
+        try:
+            data.snapshot(e)
+        except Exception as ex:  # noqa: BLE001
+            print("snapshot failed", e["id"], ex, file=sys.stderr, flush=True)
+    done += 1
+    time.sleep(a.delay)
+print("done", flush=True)

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Libretto Finder</title>
+<meta name="description" content="Where to find opera libretti with the original and an English translation side by side.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>Libretto Finder</h1>
+<p>The best way into an opera is to listen while reading the original and a translation side by side. Finding those pages means searching, and searching, and searching. This is the list, so you don't have to.</p>
+<p>Links marked <em>translation only</em> are single-language pages: useful, but not the thing. Every link has an <em>archived</em> copy, because libretto sites die.</p>
+
+<form id="f" onsubmit="return false">
+  <input id="q" type="search" placeholder="Search opera or composer" aria-label="Search">
+  <label><input id="sbs" type="checkbox" checked> side by side only</label>
+  <label>translation <select id="lang"><option value="en">English</option><option value="">any</option></select></label>
+</form>
+
+<div id="list"></div>
+
+<hr>
+<p id="count"></p>
+<p>Other places worth knowing that are not indexed per opera here: <a href="http://www.kareol.es/">Kareol</a> (original plus Spanish, side by side, hundreds of operas), <a href="https://archive.org/details/bookof101operali0000unse">The Book of 101 Opera Librettos</a> on the Internet Archive (facing-page translations, borrowable), and <a href="https://imslp.org/">IMSLP</a> for scanned vocal scores that often carry a singing translation under the original.</p>
+<script src="app.js"></script>
+</body>
+</html>
