@@ -21,7 +21,9 @@ e = data.entry(a.opera.strip(), a.composer.strip(), a.url.strip(), langs, a.side
 entries = data.load()
 if any(x["id"] == e["id"] for x in entries):
     sys.exit(f"already listed: {e['id']}")
-saved = data.wayback_save(e["url"])
+saved, _ = data.wayback_existing(e["url"])
+if not saved:
+    saved, _ = data.wayback_save(e["url"])
 if saved:
     e["wayback"] = saved
 if not a.no_snapshot:

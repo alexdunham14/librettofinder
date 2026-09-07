@@ -1,33 +1,57 @@
 #!/usr/bin/env python3
-"""Request Wayback saves (and private local snapshots) for entries that lack a dated snapshot.
+"""Get a dated Wayback snapshot for every entry that lacks one, and a private local copy.
 
-./wayback [--delay 20] [--limit N] [--no-snapshot]
-Slow on purpose: archive.org rate-limits Save Page Now. Safe to rerun; it picks up where it left off.
+./wayback [--delay 30] [--limit N] [--no-snapshot] [--no-save]
+
+Gentle with archive.org on purpose, because it throttles by IP and we were throttled:
+  1. Ask the availability API whether a snapshot already exists; if so, use it.
+     No save request at all for pages the Wayback Machine already has.
+  2. Only then ask Save Page Now, and only for pages not on archive.org itself.
+  3. On 429, 5xx, or a refused connection, back off (1 min, doubling to 30 min) and
+     give up after six failures in a row: archive.org is saying no, try tomorrow.
+  4. Honour Retry-After. With IA_ACCESS_KEY and IA_SECRET_KEY set (a free archive.org
+     account, https://archive.org/account/s3.php), saves go through the authenticated
+     Save Page Now API, which is allowed more than anonymous saves.
+Safe to rerun; it picks up where it left off.
 """
-import argparse, sys, time
+import argparse, os, sys, time
 import data
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--delay", type=float, default=20)
+ap.add_argument("--delay", type=float, default=30, help="seconds between entries")
 ap.add_argument("--limit", type=int, default=0)
-ap.add_argument("--no-snapshot", action="store_true")
+ap.add_argument("--no-snapshot", action="store_true", help="skip the private local copy")
+ap.add_argument("--no-save", action="store_true", help="only look for existing snapshots, never request a save")
 a = ap.parse_args()
 
 entries = data.load()
-todo = [e for e in entries if "web.archive.org/web/2/" in e["wayback"] and "web.archive.org" not in e["url"]]
+todo = [e for e in entries if "web.archive.org/web/2/" in e["wayback"] and not data.is_archive_org(e["url"])]
 print(f"{len(todo)} entries without a dated snapshot", flush=True)
-done = 0
+done = failures = 0
+backoff = 60
 for e in todo:
     if a.limit and done >= a.limit:
         break
-    saved = data.wayback_save(e["url"])
-    if saved:
-        e["wayback"] = saved
+    found, status = data.wayback_existing(e["url"])
+    if not found and not a.no_save and status == "ok":
+        found, status = data.wayback_save(e["url"])
+    if found:
+        e["wayback"] = found
         data.save(entries)
-        print("saved", e["id"], flush=True)
+        print("dated", e["id"], flush=True)
+        failures = 0; backoff = 60
+    elif status == "ok":
+        print("no snapshot", e["id"], flush=True)
+        failures = 0; backoff = 60
     else:
-        print("skipped", e["id"], flush=True)
-    if not a.no_snapshot:
+        failures += 1
+        wait = max(backoff, status if isinstance(status, (int, float)) else 0)
+        print(f"archive.org said no ({status}); {failures} in a row, waiting {wait:.0f}s", flush=True)
+        if failures >= 6:
+            print("archive.org is throttling us; stopping. Run again tomorrow.", flush=True)
+            break
+        time.sleep(wait); backoff = min(backoff * 2, 1800)
+    if not a.no_snapshot and not os.path.exists(data.snapshot_path(e)):
         try:
             data.snapshot(e)
         except Exception as ex:  # noqa: BLE001

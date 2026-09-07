@@ -118,27 +118,72 @@ def merge(entries, new, prune=None):
     return added, updated
 
 
-def wayback_save(url):
-    """Ask the Wayback Machine to save URL now. Returns a dated snapshot URL, or None."""
+def is_archive_org(url):
+    return urllib.parse.urlparse(url).netloc.endswith("archive.org")
+
+
+def _throttled(e):
+    """Map an archive.org error to a status the walker can back off on: seconds from
+    Retry-After, else the HTTP code (429 and 5xx mean 'not now'), else 'ok' for a plain miss."""
+    if isinstance(e, urllib.error.HTTPError):
+        ra = e.headers.get("Retry-After")
+        if ra and ra.isdigit():
+            return int(ra)
+        return e.code if e.code == 429 or e.code >= 500 else "ok"
+    return "refused"
+
+
+def wayback_existing(url):
+    """Ask the availability API for an existing snapshot. Returns (dated url or None, status)."""
     try:
-        safe_url = urllib.parse.quote(url, safe=":/?&=+%#~")
+        q = "https://archive.org/wayback/available?url=" + urllib.parse.quote(url, safe="")
+        with urllib.request.urlopen(urllib.request.Request(q, headers={"User-Agent": UA}), timeout=60) as r:
+            snap = json.load(r).get("archived_snapshots", {}).get("closest")
+        if snap and snap.get("available") and re.search(r"web\.archive\.org/web/\d{8,}", snap.get("url", "")):
+            return snap["url"].replace("http://web.archive.org", "https://web.archive.org"), "ok"
+        return None, "ok"
+    except Exception as e:  # noqa: BLE001
+        sys.stderr.write(f"availability failed for {url}: {e}\n")
+        return None, _throttled(e)
+
+
+def wayback_save(url):
+    """Ask the Wayback Machine to save URL now. Returns (dated snapshot url or None, status).
+    With IA_ACCESS_KEY and IA_SECRET_KEY set, uses the authenticated Save Page Now API."""
+    safe_url = urllib.parse.quote(url, safe=":/?&=+%#~")
+    key, secret = os.environ.get("IA_ACCESS_KEY"), os.environ.get("IA_SECRET_KEY")
+    try:
+        if key and secret:
+            body = urllib.parse.urlencode({"url": url, "skip_first_archive": "1"}).encode()
+            req = urllib.request.Request("https://web.archive.org/save", data=body, headers={
+                "User-Agent": UA, "Accept": "application/json", "Authorization": f"LOW {key}:{secret}"})
+            with urllib.request.urlopen(req, timeout=120) as r:
+                j = json.load(r)
+            if j.get("job_id"):
+                # the capture runs in the background; the availability API sees it within a minute or so
+                time.sleep(20)
+                return wayback_existing(url)
+            return None, "ok"
         req = urllib.request.Request("https://web.archive.org/save/" + safe_url, headers={"User-Agent": UA})
         with urllib.request.urlopen(req, timeout=120) as r:
             loc = r.headers.get("Content-Location") or r.geturl()
             if loc.startswith("/"):
                 loc = "https://web.archive.org" + loc
             if re.search(r"web\.archive\.org/web/\d{8,}", loc):
-                return loc
-    except urllib.error.HTTPError as e:
-        sys.stderr.write(f"wayback {e.code} for {url}\n")
+                return loc, "ok"
+            return None, "ok"
     except Exception as e:  # noqa: BLE001
-        sys.stderr.write(f"wayback failed for {url}: {e}\n")
-    return None
+        sys.stderr.write(f"wayback save failed for {url}: {e}\n")
+        return None, _throttled(e)
+
+
+def snapshot_path(e):
+    return os.path.join(ARCHIVE, e["id"] + ".html")
 
 
 def snapshot(e, page=None):
     os.makedirs(ARCHIVE, exist_ok=True)
-    path = os.path.join(ARCHIVE, e["id"] + ".html")
+    path = snapshot_path(e)
     if page is None:
         page, _ = fetch(e["url"])
     with open(path, "w", encoding="utf-8") as f:
