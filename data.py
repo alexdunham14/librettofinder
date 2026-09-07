@@ -207,6 +207,16 @@ COMPOSERS = {
     "Stanislav Moniuszko": "Stanisław Moniuszko",
     "George Enescu": "George Enescu", "Peter Eötvös": "Péter Eötvös",
     "Jesús Guridi": "Jesús Guridi", "Franco Alfano": "Franco Alfano",
+    # opera-arias.com and librettidopera.it forms
+    "André Gretry": "André Grétry", "Carl Cornelius": "Peter Cornelius", "Daniel Auber": "Daniel-François-Esprit Auber",
+    "Emilio de Cavalieri": "Emilio de' Cavalieri", "Emilio De' Cavalieri": "Emilio de' Cavalieri",
+    "Eugen de Albert": "Eugen d'Albert", "Erich Korngold": "Erich Wolfgang Korngold", "Gasparo Spontini": "Gaspare Spontini",
+    "Gian Menotti": "Gian Carlo Menotti", "Giovanni Pergolesi": "Giovanni Battista Pergolesi",
+    "Giuseppe Mercadante": "Saverio Mercadante", "Gustav Albert Lortzing": "Albert Lortzing", "Jean Rameau": "Jean-Philippe Rameau",
+    "Victor Nessler": "Victor Ernst Nessler", "Vicente Martin y Soler": "Vicente Martín y Soler", "Vicente Martin Y Soler": "Vicente Martín y Soler",
+    "Antonio Lucio Vivaldi": "Antonio Vivaldi", "Anonimo": "Anonymous", "Autori Vari": "Various composers",
+    "Sigismondo D'india": "Sigismondo d'India", "Marco Da Gagliano": "Marco da Gagliano", "Rinaldo Da Capua": "Rinaldo da Capua",
+    "Michele Carafa De Colobrano": "Michele Carafa", "Gian Francesco (Ciccio) De Majo": "Gian Francesco de Majo",
 }
 
 # Original language of the libretto, by composer, with per-opera exceptions below.
@@ -263,6 +273,27 @@ ORIGINAL = {
     "hr": ["Ivo Josipović"],
 }
 ORIGINAL = {c: code for code, cs in ORIGINAL.items() for c in cs}
+# Composers that arrived with librettidopera.it, opera-arias.com and fr.wikisource.org.
+ORIGINAL_MORE = {
+    "it": ["Adolfo Baci", "Agostino Steffani", "Alessandro Scarlatti", "Alessandro Stradella", "Antonio Cagnoni", "Antonio Cesti",
+           "Antonio Lotti", "Antonio Maria Bononcini", "Antonio Sartorio", "Baldassarre Galuppi", "Benedetto Marcello",
+           "Carlo Evasio Soliva", "Carlo Francesco Pollarolo", "Carlo Pallavicino", "Domenico Belli", "Domenico Freschi",
+           "Domenico Mazzocchi", "Domenico Sarro", "Domenico Scarlatti", "Emilio de' Cavalieri", "Ferdinando Paër", "Filippo Vitali",
+           "Francesco Gasparini", "Francesco Gnecco", "Francesco Manelli", "Francesco Morlacchi", "Francesco Sacrati", "Franco Faccio",
+           "Gaetano Latilla", "Giacinto Cornacchioli", "Giacomo Antonio Perti", "Gian Francesco de Majo",
+           "Giovanni Andrea Angelini Bontempi", "Giovanni Antonio Boretti", "Giovanni Bottesini", "Giovanni Legrenzi", "Giovanni Pacini",
+           "Girolamo Giacobbi", "Giuseppe Apolloni", "Giuseppe Sarti", "Jacopo Corsi and Jacopo Peri", "Jacopo Melani",
+           "Jacopo Melani and Alessandro Stradella", "Johann Adolph Hasse", "Johann Simon Mayr", "Leonardo Leo", "Luigi Ricci",
+           "Luigi Ricci and Federico Ricci", "Luigi Rossi", "Marc'Antonio Ziani", "Marco Da Gagliano and Jacopo Peri and Francesca Caccini",
+           "Marco da Gagliano", "Michele Carafa", "Niccolò Antonio Zingarelli", "Niccolò Jommelli", "Nicola Porpora", "Pasquale Anfossi",
+           "Pietro Alessandro Guglielmi", "Pietro Andrea Ziani", "Pietro Auletta", "Rinaldo da Capua", "Sante Orlandi", "Sigismondo d'India",
+           "Stefano Gobatti", "Stefano Pavesi", "Tomaso Albinoni", "Tommaso Traetta", "Valentino Fioravanti", "Vincenzo Pucitta",
+           "Vincenzo Righini"],
+    "fr": ["André Grétry", "Franz Servais", "Gaston Serpette"],
+    "en": ["Arthur Sullivan", "Carlisle Floyd", "Michael William Balfe"],
+    "ru": ["César Cui"],
+}
+ORIGINAL.update({c: code for code, cs in ORIGINAL_MORE.items() for c in cs})
 
 # (composer, canonical opera) -> language, where an opera departs from its composer's usual language.
 OPERA_ORIGINAL = {
@@ -480,6 +511,42 @@ OPERAS = {
         "horacios-y-curiacios": "Orazi e Curiazi", "los-dos-figaros": "I due Figaro"},
     "Gaspare Spontini": {"agnese-de-hohenstaufen": "Agnes von Hohenstaufen", "fernando-cortes": "Fernand Cortez", "la-vestal": "La vestale"},
 }
+
+# opera-arias.com and librettidopera.it spellings (dropped articles, typos, translated titles).
+OPERAS_MORE = {
+    "Vincenzo Bellini": {"i-capuleti-ed-i-montecchi": "I Capuleti e i Montecchi"},
+    "Alexander Borodin": {"prinz-igor": "Prince Igor"},
+    "Benjamin Britten": {"turn-of-the-screw": "The Turn of the Screw"},
+    "Emilio de' Cavalieri": {"rappresentatione-di-anima-et-di-corpo": "Rappresentatione di Anima, et di Corpo",
+        "rappresentazione-di-anima-e-di-corpo": "Rappresentatione di Anima, et di Corpo"},
+    "Francesco Cavalli": {"lercole-amante": "Ercole amante"},
+    "Gaetano Donizetti": {"assedio-di-calais": "L'assedio di Calais", "gianni-da-calais": "Gianni di Calais",
+        "le-convenienze-e-le-inconvenienze-teatrali": "Le convenienze ed inconvenienze teatrali",
+        "maria-de-rudenz": "Maria di Rudenz", "marin-faliero": "Marino Faliero"},
+    "Paul Dukas": {"ariane-et-barbebleue": "Ariane et Barbe-bleue"},
+    "Christoph Willibald Gluck": {"paride-e-elena": "Paride ed Elena"},
+    "André Grétry": {"richard-coeur-de-lion": "Richard Cœur de Lion"},
+    "Stefano Landi": {"la-morte-di-orfeo": "La morte d'Orfeo"},
+    "Pietro Mascagni": {"amico-fritz": "L'amico Fritz", "gugliermo-ratcliff": "Guglielmo Ratcliff"},
+    "Jules Massenet": {"don-quichote": "Don Quichotte", "sappho": "Sapho"},
+    "Gian Carlo Menotti": {"amahl-and-the-nightvisitors": "Amahl and the Night Visitors"},
+    "Claudio Monteverdi": {"il-ritorno-di-ulisse-in-patria": "Il ritorno d'Ulisse in patria"},
+    "Wolfgang Amadeus Mozart": {"schauspieldirektor": "Der Schauspieldirektor", "le-oca-del-cairo": "L'oca del Cairo", "idomeneo": "Idomeneo, re di Creta"},
+    "Otto Nicolai": {"die-lustige-weiber-von-windsor": "Die lustigen Weiber von Windsor"},
+    "Jacques Offenbach": {"grande-duchesse-gerolstein": "La Grande-Duchesse de Gérolstein"},
+    "Jacopo Peri": {"leuridice": "Euridice"},
+    "Giacomo Puccini": {"fanciulla-del-west": "La fanciulla del West", "madame-butterfly": "Madama Butterfly"},
+    "Gioachino Rossini": {"riccardo-e-zoraide": "Ricciardo e Zoraide", "comte-ory": "Le comte Ory", "assedio-di-corinto": "L'assedio di Corinto"},
+    "Richard Strauss": {"aegyptische-helena": "Die ägyptische Helena", "der-frau-ohne-schatten": "Die Frau ohne Schatten"},
+    "Giuseppe Verdi": {"don-carlo": "Don Carlos", "lombardi-prima-crociata": "I Lombardi alla prima crociata", "oberto": "Oberto, conte di San Bonifacio"},
+    "Hector Berlioz": {"romeo-et-juliette": "Roméo et Juliette"},
+    "François-Adrien Boieldieu": {"dame-blanche": "La dame blanche"},
+    "Maurice Ravel": {"enfant-et-sortileges": "L'enfant et les sortilèges"},
+    "Victor Ernst Nessler": {"trompeter-sakkingen": "Der Trompeter von Säckingen"},
+    "Adolphe Adam": {"le-toreador": "Le toréador"},
+}
+for _c, _t in OPERAS_MORE.items():
+    OPERAS.setdefault(_c, {}).update(_t)
 
 
 def canonicalize(e):

@@ -35,8 +35,18 @@ From a phone: open a new issue using the "Add a libretto link" template.
 ./seed/librettoarchive.py > seed/out/librettoarchive.json
 ./seed/rwagner.py        > seed/out/rwagner.json
 ./seed/operaguide.py     > seed/out/operaguide.json   # ~515 polite fetches, a few minutes
+./seed/kareol.py         > seed/out/kareol.json
+./seed/librettidopera.py > seed/out/librettidopera.json   # ~335 fetches, Italian only
+./seed/opera-arias.py    > seed/out/opera-arias.json      # ~550 fetches, originals + separate English pages
+./seed/wikisource-fr.py  > seed/out/wikisource-fr.json    # ~90 fetches, French (mostly Offenbach)
 ./merge seed/out/*.json
 ```
+
+Scanned bilingual libretti (archive.org, IMSLP, Library of Congress) and
+record-label booklets are found by hand, not seeded: archive.org's metadata
+mixes libretti with vocal scores and recordings, so each item is checked
+before it is added. murashev.com is the same site as librettoarchive.com
+(it redirects there) and is not seeded separately.
 
 `merge` is idempotent: entries are keyed by id, so rerunning a seed updates
 rather than duplicates. `./merge --prune kareol.es seed/out/kareol.json` also
