@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""./composers [PATH_TO_classical_orchestrator.db]  -- refresh composer_aliases.json from classicalconcertmap.
+
+classical-orchestrator (Alex's concert-map pipeline) keeps 19,000 composers with 49,000 spelling
+variants. For every composer already in libretti.json we take all of that pipeline's variants and
+point them at the spelling librettofinder uses, so a new source's spelling folds without a hand
+alias. data.canonicalize consults the file after the hand table in data.py, which always wins."""
+import json, os, sqlite3, sys
+import data
+
+DB = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/projects/classical-orchestrator/classical_orchestrator.db")
+db = sqlite3.connect(DB)
+by_key = {}
+for k, cid in db.execute("select alias_key, composer_id from composer_aliases where alias_key is not null"):
+    by_key.setdefault(k, cid)
+variants = {}
+for k, cid in db.execute("select alias_key, composer_id from composer_aliases where alias_key is not null"):
+    variants.setdefault(cid, set()).add(k)
+
+ours = sorted({e["composer"] for e in data.load()})
+aliases, unknown = {}, []
+for name in ours:
+    cid = by_key.get(data.alias_key(name))
+    if cid is None:
+        unknown.append(name)
+        continue
+    for k in variants[cid]:
+        if k != data.alias_key(name) and " " in k:  # a bare surname (Strauss, Scarlatti, Ricci) is not a spelling
+            aliases.setdefault(k, name)
+# Two of our composers must not share a pipeline composer; if they do, neither gets the aliases.
+owners = {}
+for name in ours:
+    cid = by_key.get(data.alias_key(name))
+    if cid is not None:
+        owners.setdefault(cid, []).append(name)
+for cid, names in owners.items():
+    if len(names) > 1:
+        print("shared pipeline composer, aliases dropped:", names, file=sys.stderr)
+        for k in variants[cid]:
+            aliases.pop(k, None)
+with open(os.path.join(data.HERE, "composer_aliases.json"), "w", encoding="utf-8") as f:
+    json.dump(dict(sorted(aliases.items())), f, ensure_ascii=False, indent=0)
+    f.write("\n")
+print(f"{len(aliases)} spelling variants for {len(ours) - len(unknown)} composers; {len(unknown)} of ours unknown to the pipeline:", file=sys.stderr)
+print("  " + ", ".join(unknown), file=sys.stderr)

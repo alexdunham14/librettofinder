@@ -6,6 +6,7 @@ import os
 import re
 import sys
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -217,6 +218,7 @@ COMPOSERS = {
     "Antonio Lucio Vivaldi": "Antonio Vivaldi", "Anonimo": "Anonymous", "Autori Vari": "Various composers",
     "Sigismondo D'india": "Sigismondo d'India", "Marco Da Gagliano": "Marco da Gagliano", "Rinaldo Da Capua": "Rinaldo da Capua",
     "Michele Carafa De Colobrano": "Michele Carafa", "Gian Francesco (Ciccio) De Majo": "Gian Francesco de Majo",
+    "Baldassarre Galuppi": "Baldassare Galuppi",
 }
 
 # Original language of the libretto, by composer, with per-opera exceptions below.
@@ -521,6 +523,7 @@ OPERAS_MORE = {
         "rappresentazione-di-anima-e-di-corpo": "Rappresentatione di Anima, et di Corpo"},
     "Francesco Cavalli": {"lercole-amante": "Ercole amante"},
     "Gaetano Donizetti": {"assedio-di-calais": "L'assedio di Calais", "gianni-da-calais": "Gianni di Calais",
+        "lucie-de-lammermoor": "Lucia di Lammermoor",
         "le-convenienze-e-le-inconvenienze-teatrali": "Le convenienze ed inconvenienze teatrali",
         "maria-de-rudenz": "Maria di Rudenz", "marin-faliero": "Marino Faliero"},
     "Paul Dukas": {"ariane-et-barbebleue": "Ariane et Barbe-bleue"},
@@ -536,7 +539,8 @@ OPERAS_MORE = {
     "Jacques Offenbach": {"grande-duchesse-gerolstein": "La Grande-Duchesse de Gérolstein"},
     "Jacopo Peri": {"leuridice": "Euridice"},
     "Giacomo Puccini": {"fanciulla-del-west": "La fanciulla del West", "madame-butterfly": "Madama Butterfly"},
-    "Gioachino Rossini": {"riccardo-e-zoraide": "Ricciardo e Zoraide", "comte-ory": "Le comte Ory", "assedio-di-corinto": "L'assedio di Corinto"},
+    "Gioachino Rossini": {"riccardo-e-zoraide": "Ricciardo e Zoraide", "comte-ory": "Le comte Ory", "assedio-di-corinto": "L'assedio di Corinto",
+        "guglielmo-tell": "Guillaume Tell"},
     "Richard Strauss": {"aegyptische-helena": "Die ägyptische Helena", "der-frau-ohne-schatten": "Die Frau ohne Schatten"},
     "Giuseppe Verdi": {"don-carlo": "Don Carlos", "lombardi-prima-crociata": "I Lombardi alla prima crociata", "oberto": "Oberto, conte di San Bonifacio"},
     "Hector Berlioz": {"romeo-et-juliette": "Roméo et Juliette"},
@@ -549,9 +553,27 @@ for _c, _t in OPERAS_MORE.items():
     OPERAS.setdefault(_c, {}).update(_t)
 
 
+def alias_key(name):
+    """Lower-case, accents and punctuation dropped: the key classical-orchestrator uses for composer spellings."""
+    s = unicodedata.normalize("NFKD", name)
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    return re.sub(r"\s+", " ", re.sub(r"[\W_]+", " ", s.lower())).strip()
+
+
+def _load_aliases():
+    try:
+        with open(os.path.join(HERE, "composer_aliases.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+
+ALIASES = _load_aliases()  # spelling key -> our name, from classicalconcertmap's pipeline; see ./composers
+
+
 def canonicalize(e):
     """Fold a source's spelling of composer and opera to the canonical form, keeping the source's title in listed_as."""
-    composer = COMPOSERS.get(e["composer"], e["composer"])
+    composer = COMPOSERS.get(e["composer"]) or ALIASES.get(alias_key(e["composer"]), e["composer"])
     table = OPERAS.get(composer, {})
     hit = table.get(slug(e["opera"])) or (table.get(slug(e["listed_as"])) if e.get("listed_as") else None)
     if isinstance(hit, tuple):

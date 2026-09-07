@@ -39,6 +39,7 @@ From a phone: open a new issue using the "Add a libretto link" template.
 ./seed/librettidopera.py > seed/out/librettidopera.json   # ~335 fetches, Italian only
 ./seed/opera-arias.py    > seed/out/opera-arias.json      # ~550 fetches, originals + separate English pages
 ./seed/wikisource-fr.py  > seed/out/wikisource-fr.json    # ~90 fetches, French (mostly Offenbach)
+./seed/operaglass.py     > seed/out/operaglass.json       # ~110 Wayback fetches, slow; the site itself is down
 ./merge seed/out/*.json
 ```
 
@@ -67,6 +68,14 @@ tables as entries are made; `./normalize` reapplies them to `libretti.json`
 after a table change. Idempotent. Ids are built from the names as the source
 gives them, so they never change when a table does.
 
+Behind the hand table sits `composer_aliases.json`: every spelling variant
+that classicalconcertmap's pipeline (`~/projects/classical-orchestrator`)
+knows for a composer already listed here, keyed the way that pipeline keys
+them (lower case, accents dropped), pointing at this site's spelling.
+`./composers` regenerates it from the pipeline's SQLite database; rerun it
+after a merge brings in new composers. Bare surnames are left out so
+"Strauss" never picks a Strauss.
+
 ## Archiving
 
 Seeds record the Wayback "latest snapshot" link. `./wayback` walks entries
@@ -81,5 +90,6 @@ background and let it finish on its own. Private local copies go under
   original, side_by_side, source, url, wayback, added, note, listed_as.
 - `index.html`, `styles.css`, `app.js`: the site. No build step.
 - `data.py`: shared helpers (load, save, merge, wayback, snapshot).
-- `add`, `merge`, `normalize`, `wayback`: the four commands.
+- `add`, `merge`, `normalize`, `wayback`, `composers`: the five commands.
+- `composer_aliases.json`: composer spellings from classicalconcertmap, see Names.
 - `seed/`: one script per bulk source.
