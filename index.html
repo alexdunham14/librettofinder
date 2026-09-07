@@ -15,13 +15,17 @@
 <form id="f" onsubmit="return false">
   <div class="row">
     <span class="rowlabel">search</span>
-    <input id="q" type="search" placeholder="opera or composer" aria-label="Search">
-    <button type="button" id="clear-q" class="clear" title="Clear the search">clear</button>
+    <div class="ctl">
+      <input id="q" type="search" placeholder="opera or composer" aria-label="Search">
+      <button type="button" id="clear-q" class="clear" title="Clear the search">clear</button>
+    </div>
   </div>
   <div class="row">
     <span class="rowlabel">show</span>
-    <label><input id="sbs" type="checkbox" checked> side by side only</label>
-    <label>translation <select id="lang"><option value="en">English</option><option value="">any</option></select></label>
+    <div class="ctl">
+      <label><input id="sbs" type="checkbox" checked> side by side only</label>
+      <label>translation <select id="lang"><option value="en">English</option><option value="">any</option></select></label>
+    </div>
   </div>
 </form>
 <p id="count"></p>
