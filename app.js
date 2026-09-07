@@ -64,5 +64,6 @@
     count.textContent = `${operas} operas with a side-by-side text, ${english} of them with English · ${rows.length} links in all · showing ${shownOperas} opera${shownOperas === 1 ? "" : "s"}, ${shown.length} link${shown.length === 1 ? "" : "s"}.`;
   }
   q.addEventListener("input", render); sbs.addEventListener("change", render); lang.addEventListener("change", render);
+  document.getElementById("clear-q").addEventListener("click", () => { q.value = ""; render(); q.focus(); });
   render();
 })();

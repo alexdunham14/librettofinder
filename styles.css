@@ -4,12 +4,19 @@ h1 { font-weight: normal; font-size: 2rem; margin: 0 0 .5rem; }
 h2 { font-weight: normal; font-size: 1.25rem; margin: 2rem 0 .25rem; border-bottom: 1px solid #ccc; }
 h2 small { color: #888; font-size: .75em; }
 #count { color: #666; margin: -.75rem 0 1.5rem; }
-form { margin: 1.5rem 0; display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; }
+.draft { color: #a33; font-style: italic; }
+/* Filters: one row per kind, a small label at the left, a rule between rows. */
+form { margin: 1.5rem 0; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
+form .row { display: flex; flex-wrap: wrap; gap: .3rem 1rem; align-items: center; padding: .4rem 0; }
+form .row + .row { border-top: 1px dotted #ddd; }
+.rowlabel { flex: 0 0 4.5rem; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: #777; }
 #q { flex: 1 1 14rem; font: inherit; padding: .3rem .5rem; }
-select { font: inherit; }
+select, button { font: inherit; }
+button.clear { font-size: .85rem; padding: .1rem .5rem; border: 1px solid #bbb; border-radius: .25rem; background: transparent; color: inherit; cursor: pointer; }
+button.clear:hover { border-color: #666; }
 dl { margin: 0; }
 dt { margin-top: .6rem; }
 dd { margin: 0 0 0 1.25rem; }
 dd small { color: #666; }
-@media (prefers-color-scheme: dark) { dd small { color: #999; } h2 { border-color: #444; } }
+@media (prefers-color-scheme: dark) { dd small, .rowlabel { color: #999; } h2 { border-color: #444; } form, form .row + .row { border-color: #333; } button.clear { border-color: #555; } }
 .none { color: #666; }
