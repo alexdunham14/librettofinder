@@ -55,13 +55,13 @@
         <dt>${esc(o)}</dt>
         ${byComposer.get(c).get(o).sort((a, b) => b.side_by_side - a.side_by_side || a.source.localeCompare(b.source)).map(r => `
         <dd><a href="${esc(r.url)}" rel="noopener">${esc(label(r))}</a>
-          <small>${esc(r.source)}${r.url === r.wayback ? "" : ` · <a href="${esc(r.wayback)}" rel="noopener">archived</a>`}${r.listed_as ? ` · listed as “${esc(r.listed_as)}”` : ""}${r.note ? " · " + esc(r.note) : ""}</small></dd>`).join("")}`).join("")}
+          <small>${esc(r.source)}${r.url === r.wayback ? "" : `, <a href="${esc(r.wayback)}" rel="noopener">archived</a>`}${r.listed_as ? `, listed as “${esc(r.listed_as)}”` : ""}${r.note ? ", " + esc(r.note) : ""}</small></dd>`).join("")}`).join("")}
       </dl>`).join("")
       : '<p class="none">Nothing matches. Untick "side by side only" to see single-language pages, or set translation to "any".</p>';
     const operas = new Set(rows.filter(r => r.side_by_side).map(r => r.composer + "|" + r.opera)).size;
     const english = new Set(rows.filter(r => r.side_by_side && r.languages.includes("en")).map(r => r.composer + "|" + r.opera)).size;
     const shownOperas = new Set(shown.map(r => r.composer + "|" + r.opera)).size;
-    count.textContent = `${operas} operas with a side-by-side text, ${english} of them with English · ${rows.length} links in all · showing ${shownOperas} opera${shownOperas === 1 ? "" : "s"}, ${shown.length} link${shown.length === 1 ? "" : "s"}.`;
+    count.textContent = `${operas} operas with a side-by-side text, ${english} of them with English. ${rows.length} links in all. Showing ${shownOperas} opera${shownOperas === 1 ? "" : "s"}, ${shown.length} link${shown.length === 1 ? "" : "s"}.`;
   }
   q.addEventListener("input", render); sbs.addEventListener("change", render); lang.addEventListener("change", render);
   document.getElementById("clear-q").addEventListener("click", () => { q.value = ""; render(); q.focus(); });
